@@ -6,11 +6,11 @@ Complete this file in the first week, commit it, and do not delete the headings.
 
 ## 1. Group and members
 
-- Group ID: <for example G07>
-- Member 1: <full name>, <matric number>, <role for the first two weeks>
-- Member 2: <full name>, <matric number>, <role for the first two weeks>
-- Member 3: <full name>, <matric number>, <role for the first two weeks>
-- Member 4: <full name>, <matric number>, <role for the first two weeks>
+- Group ID: <G03>
+- Member 1: <Najihah Binti Azhan Khan>, <A24CS0144>, <role for the first two weeks>
+- Member 2: <Alisya Humayraa Binti Mohd Khairani>, <A24CS0043>, <role for the first two weeks>
+- Member 3: <Allisya Maisarah Binti Suraizal>, <A24CS0044>, <role for the first two weeks>
+- Member 4: <Nur Anisah Solehah Binti Mohd Hamim>, <A24CS0157>, <role for the first two weeks>
 
 ## 2. Roles
 

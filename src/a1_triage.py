@@ -132,6 +132,21 @@ def gene_summary(results: list[dict]) -> dict[str, dict]:
     raise NotImplementedError("TODO: implement gene_summary")
 
 
+MIN_K: int = 0
+
+DECISION_PRIORITY_ORDER: dict[str, int] = {
+    "prioritize": 0,
+    "review": 1,
+}
+
+IMPACT_PRIORITY_ORDER: dict[str, int] = {
+    "high": 0,
+    "moderate": 1,
+    "low": 2,
+    "modifier": 3,
+}
+
+
 def rank_variants(results: list[dict], k: int) -> list[dict]:
     """Top k variants that were not excluded, best first.
 

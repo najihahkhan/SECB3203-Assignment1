@@ -91,7 +91,7 @@ def decision_counts(results: list[dict]) -> dict[str, int]:
         impact = str(row["impact"]).strip().lower()
         if impact in counts:
             counts[impact] += 1
-        return counts
+    return counts
 
 def gene_summary(results: list[dict]) -> dict[str, dict[str, int | float]]:
     if not results:

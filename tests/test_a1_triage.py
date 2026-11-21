@@ -1,5 +1,8 @@
+from pathlib import Path
+import subprocess
+import sys
 import pytest
-from src.a1_triage import classify_variant, triage, decision_counts, gene_summary, CSV_COLUMNS, rank_variants, results_to_csv
+from src.a1_triage import classify_variant, triage, decision_counts, gene_summary, CSV_COLUMNS, rank_variants, results_to_csv, build_report
 
 G03_PARAMS = {
     "min_depth": 12,
@@ -216,3 +219,67 @@ def test_results_to_csv_header_and_rows() -> None:
         "v1,G1,chr1,100,50,85,high,prioritize,"
         "Rule 3 priority gene G1 with high impact\n"
     ) 
+
+def test_format_report_structure_and_content() -> None:
+    """Cover report structure, header, and content for a small example."""
+    rows = [
+        {
+            "variant": "rs101",
+            "gene": "BRCA2",
+            "chrom": "chr13",
+            "pos": 32315474,
+            "depth": 45,
+            "quality": 92,
+            "impact": "high",
+            "decision": "prioritize",
+            "reason": "Rule 3 priority gene BRCA2 with high impact",
+        },
+        {
+            "variant": "rs202",
+            "gene": "TP53",
+            "chrom": "chr17",
+            "pos": 7675088,
+            "depth": 30,
+            "quality": 88,
+            "impact": "moderate",
+            "decision": "review",
+            "reason": "Rule 5 non-priority gene TP53 with moderate impact",
+        },
+        {
+            "variant": "rs303",
+            "gene": "EGFR",
+            "chrom": "chr7",
+            "pos": 5524231,
+            "depth": 50,
+            "quality": 67,
+            "impact": "low",
+            "decision": "exclude",
+            "reason": "Rule 2 quality below threshold",
+        },
+    ]
+
+    report = build_report(rows, G03_PARAMS)
+    assert isinstance(report, str)
+    assert report.startswith("Report Summary")
+    assert report.count("\n") > 5
+
+    def test_cli_execution_and_output(tmp_path: Path) -> None:
+        input_csv = tmp_path / "variants.csv"
+        input_csv.write_text(
+            "variant,gene,chrom,pos,depth,quality,impact\n"
+            "rs101,BRCA2,chr13,32315474,45,92,high\n"
+            "rs202,TP53,chr17,7675088,30,88,moderate\n"
+            "rs303,EGFR,chr7,5524231,50,67,low\n"
+        )
+
+        output_csv = tmp_path / "triaged_variants.csv"
+
+        result = subprocess.run(
+            [ sys.executable, "-m", "src.a1_triage", "--input", str(input_csv), "--output", str(output_csv) ],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+
+        assert result.returncode == 0
+        assert output_csv.exists()

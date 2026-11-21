@@ -17,6 +17,13 @@ CSV_COLUMNS = [
 ]
 CLI_ARGUMENTS = 3
 
+HIGH_IMPACTS = {"high", "moderate"}
+LOW_IMPACTS = {"low", "modifier"}
+
+DECISION_PRIORITIZE = "prioritize"
+DECISION_REVIEW = "review"
+DECISION_EXCLUDE = "exclude"
+
 
 def load_variants(path) -> list[dict]:
     """Read variants.csv into a list of dicts. Every value stays text (Week 6 explains how)."""
@@ -31,27 +38,58 @@ def load_params(path) -> dict:
 
 
 def classify_variant(row: dict, params: dict) -> tuple[str, str]:
-    """Return (decision, reason) for one variant row.
 
-    Rules run in this order and the first rule that fires decides:
-      1. depth < params["min_depth"]                      -> exclude (low depth)
-      2. quality < params["min_quality"]                  -> exclude (low quality)
-      3. priority gene and impact high or moderate        -> prioritize
-      4. priority gene and impact low or modifier         -> review
-      5. other gene and impact high or moderate           -> review
-      6. other gene and impact low or modifier            -> exclude
-    Gene symbols and impact labels are compared after strip() and case folding.
-    depth, quality and pos may arrive as text.
-    """
-    raise NotImplementedError("TODO: implement classify_variant")
+    """Classify a single variant row against the six ordered triage rules."""
 
+    depth = int(row["depth"])
+    quality = int(row["quality"])
+    gene = str(row["gene"]).strip().upper()
+    impact = str(row["impact"]).strip().lower()
+
+    min_depth = int(params["min_depth"])
+    min_quality = int(params["min_quality"])
+    priority_genes = {str(g).strip().upper() for g in params["priority_genes"]}
+
+    if depth < min_depth:
+        return (
+            DECISION_EXCLUDE,
+            f"Rule 1: depth {depth} below min_depth {min_depth}",
+        )
+    if quality < min_quality:
+        return (
+            DECISION_EXCLUDE,
+            f"Rule 2: quality {quality} below min_quality {min_quality}",
+        )
+    if gene in priority_genes and impact in HIGH_IMPACTS:
+        return (
+            DECISION_PRIORITIZE,
+            f"Rule 3: priority gene {gene} with {impact} impact",
+        )
+    if gene in priority_genes and impact in LOW_IMPACTS:
+        return (
+            DECISION_REVIEW,
+            f"Rule 4: priority gene {gene} with {impact} impact",
+        )
+    if impact in HIGH_IMPACTS:
+        return (
+            DECISION_REVIEW,
+            f"Rule 5: non-priority gene {gene} with {impact} impact",
+        )
+    return (
+        DECISION_EXCLUDE,
+        f"Rule 6: non-priority gene {gene} with {impact} impact",
+    )
 
 def triage(rows: list[dict], params: dict) -> list[dict]:
-    """Classify every row. Returns NEW dicts (row fields plus decision and reason), same order.
-
-    The input rows and params are never modified.
-    """
-    raise NotImplementedError("TODO: implement triage")
+    """Classify all rows and return a new list of new dicts without mutating inputs."""
+    results = []
+    for row in rows:
+        decision, reason = classify_variant(row, params)
+        new_row = dict(row)
+        new_row["decision"] = decision
+        new_row["reason"] = reason
+        results.append(new_row)
+    return results
 
 
 def decision_counts(results: list[dict]) -> dict[str, int]:

@@ -213,7 +213,16 @@ def results_to_csv(results: list[dict]) -> str:
 
     Every line ends with a newline. Reason text contains no commas, so no quoting is needed.
     """
-    raise NotImplementedError("TODO: implement results_to_csv")
+    header = ",".join(CSV_COLUMNS) + "\n"
+    if not results:
+        return header
+
+    lines = [header]
+    for row in results:
+        values = [str(row[col]) for col in CSV_COLUMNS]
+        lines.append(",".join(values) + "\n")
+
+    return "".join(lines)
 
 
 def build_report(results: list[dict], params: dict) -> str:

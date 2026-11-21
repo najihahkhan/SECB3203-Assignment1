@@ -232,7 +232,38 @@ def build_report(results: list[dict], params: dict) -> str:
     'Variants: N', one 'decision: count' line per decision, a blank line,
     'Top K variants' and then 'rank. variant | gene | impact | decision' lines.
     """
-    raise NotImplementedError("TODO: implement build_report")
+    min_depth = int(params["min_depth"])
+        min_quality = int(params["min_quality"])
+        top_k = int(params["top_k"])
+        priority_genes = sorted({str(g).strip().upper() for g in params["priority_genes"]})
+        decision_counts_dict = decision_counts(results)
+        top_variants = rank_variants(results, top_k)
+    
+        lines = [
+            "Clinical Variant Triage Report",
+            f"Thresholds: min_depth={min_depth} min_quality={min_quality}",
+            f"Priority genes: {', '.join(priority_genes)}",
+            f"Variants: {len(results)}",
+        ]
+    
+        for decision, count in decision_counts_dict.items():
+            lines.append(f"{decision}: {count}")
+    
+        lines.append("")
+    
+        lines.append("Top K variants")
+        for i, variant in enumerate(top_variants, start=1):
+            lines.append(f"{i}. {variant['variant']} | {variant['gene']} | {variant['impact']} | {variant['decision']}")
+    
+        for rank, row in enumerate(top_variants, start=1):
+            variant = row["variant"]
+            gene = row["gene"]
+            impact = row["impact"]
+            decision = row["decision"]
+            lines.append(f"{rank}. {variant} | {gene} | {impact} | {decision}")
+    
+        return "\n".join(lines) + "\n"
+    
 
 
 def main(argv: list[str] | None = None) -> int:

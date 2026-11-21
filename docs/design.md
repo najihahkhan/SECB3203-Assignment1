@@ -95,5 +95,5 @@ awkward input (empty list, k = 0, k larger than the data, messy text). One line 
 4. **Stage 4 -Report formatting, Final polish & QA (humayraa):**Implement 'build_report(results,params)', write CLI/report unit tests in 'tests/test_a1_triage.py', add hints, docstrings and named constant across 'src/a1_trige.py' to pass 'ruff check src' with zero warnings and finalize 'README.md'.
 
 ###workflow
-* **Peer review checklist:** Before merging any PR at least one other team members reviews the code to verify.
+* **Peer review checklist:** Before finalizing main, at least one other team member review the code and run pytest and ruff to verify.
 * **Final integration & QA prep:** once all modules are merged the whole team conducts a walkthrough of 'src/a1_triage.py' and 'docs/design.md' together so every member can explain any part of the codebase during QA.

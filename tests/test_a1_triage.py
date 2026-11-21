@@ -1,4 +1,5 @@
-from src.a1_triage import classify_variant, triage
+import pytest
+from src.a1_triage import classify_variant, triage, decision_counts, gene_summary, CSV_COLUMNS, rank_variants, results_to_csv
 
 G03_PARAMS = {
     "min_depth": 12,
@@ -128,3 +129,90 @@ def gene_summary(results: list[dict]) -> dict[str, dict[str, int | float]]:
             "mean_depth": mean_depth,
         }
     return summary
+
+
+def test_rank_variants_order_tie_breakers_and_k_cases() -> None:
+    """Cover ranking tie-breakers, exclusion filtering, k=0, k > total, and negative k."""
+    rows = [
+        {
+            "variant": "v_excl",
+            "gene": "G1",
+            "chrom": "chr1",
+            "pos": 50,
+            "depth": 90,
+            "quality": 95,
+            "impact": "high",
+            "decision": "exclude",
+            "reason": "Rule 1 depth below threshold",
+        },
+        {
+            "variant": "v_pos_later",
+            "gene": "G1",
+            "chrom": "chr1",
+            "pos": 300,
+            "depth": 60,
+            "quality": 90,
+            "impact": "high",
+            "decision": "prioritize",
+            "reason": "Rule 3 priority gene G1 with high impact",
+        },
+        {
+            "variant": "v_pos_earlier",
+            "gene": "G1",
+            "chrom": "chr1",
+            "pos": 150,
+            "depth": 60,
+            "quality": 90,
+            "impact": "high",
+            "decision": "prioritize",
+            "reason": "Rule 3 priority gene G1 with high impact",
+        },
+        {
+            "variant": "v_review",
+            "gene": "G2",
+            "chrom": "chr1",
+            "pos": 100,
+            "depth": 80,
+            "quality": 99,
+            "impact": "high",
+            "decision": "review",
+            "reason": "Rule 5 non-priority gene G2 with high impact",
+        },
+    ]
+
+    ranked = rank_variants(rows, k=10)
+    assert [r["variant"] for r in ranked] == [
+        "v_pos_earlier",
+        "v_pos_later",
+        "v_review",
+    ]
+    assert rank_variants(rows, k=0) == []
+
+    with pytest.raises(ValueError):
+        rank_variants(rows, k=-1)
+
+
+def test_results_to_csv_header_and_rows() -> None:
+    """Cover exact CSV header and newline-terminated lines."""
+    rows = [
+        {
+            "variant": "v1",
+            "gene": "G1",
+            "chrom": "chr1",
+            "pos": 100,
+            "depth": 50,
+            "quality": 85,
+            "impact": "high",
+            "decision": "prioritize",
+            "reason": "Rule 3 priority gene G1 with high impact",
+        },
+    ]
+
+    csv_text = results_to_csv(rows)
+    lines = csv_text.splitlines(keepends=True)
+
+    assert lines[0] == ",".join(CSV_COLUMNS) + "\n"
+    assert lines[1] == (
+        "v1,G1,chr1,100,50,85,high,prioritize,"
+        "Rule 3 priority gene G1 with high impact\n"
+    ) 

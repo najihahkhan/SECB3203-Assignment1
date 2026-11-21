@@ -3,7 +3,7 @@
 Write this BEFORE you write the code, then keep it up to date. It is marked by the lecturer.
 Use your own words, your own thresholds and your own data. Delete the guidance in italics.
 
-Group ID: <your group id>      Thresholds from data/params.json: min_depth = <...>, min_quality = <...>, top_k = <...>
+Group ID: <G03>      Thresholds from data/params.json: min_depth = <...>, min_quality = <...>, top_k = <...>
 
 ## 1. Decomposition
 

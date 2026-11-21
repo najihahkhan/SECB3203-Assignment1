@@ -1,3 +1,4 @@
+
 """Assignment 1 - clinical variant triage service (synthetic teaching data only).
 
 Reads variant calls, applies ordered triage rules with named thresholds, records a
@@ -54,9 +55,19 @@ def triage(rows: list[dict], params: dict) -> list[dict]:
     raise NotImplementedError("TODO: implement triage")
 
 
+EXCLUDED_DECISION= "exclude"
+DECISION_KEYS= ("prioritize", "review", "exclude")
+IMPACT_KEYS= ("high", "moderate", "low", "modifier")
+
 def decision_counts(results: list[dict]) -> dict[str, int]:
     """Number of results per decision; keys are always prioritize, review, exclude (in order)."""
-    raise NotImplementedError("TODO: implement decision_counts")
+    counts= {key: 0 for key in DECISION_KEYS}
+    for row in results:
+        decision= str(row["decision"].strip().lower())
+        if decision in counts:
+            counts[decision] += 1
+    return counts
+
 
 
 def impact_counts(results: list[dict]) -> dict[str, int]:
@@ -64,7 +75,14 @@ def impact_counts(results: list[dict]) -> dict[str, int]:
 
     Keys are always high, moderate, low, modifier (in that order), zeros included.
     """
-    raise NotImplementedError("TODO: implement impact_counts")
+    counts = {key: 0 for key in IMPACT_KEYS}
+    for row in results:
+        decision = str(row["decision"].strip().lower())
+        if decision != EXCLUDED_DECISION:
+            impact = str(row["impact"].strip().lower())
+            if impact in counts:
+                counts[impact] += 1
+    return counts
 
 
 def gene_summary(results: list[dict]) -> dict[str, dict]:

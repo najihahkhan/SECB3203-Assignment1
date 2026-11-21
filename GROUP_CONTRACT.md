@@ -48,7 +48,7 @@ every member signs the log and this contract.
 
 ## 8. Signatures
 
-- Signed: <full name>, <matric number>, <date>
+- Signed: <Najihah Binti Azhan Khan>, <A24CS0144>, <date>
 - Signed: <full name>, <matric number>, <date>
 - Signed: <full name>, <matric number>, <date>
 - Signed: <full name>, <matric number>, <date>

@@ -3,7 +3,11 @@
 Write this BEFORE you write the code, then keep it up to date. It is marked by the lecturer.
 Use your own words, your own thresholds and your own data. Delete the guidance in italics.
 
-Group ID: <your group id>      Thresholds from data/params.json: min_depth = <...>, min_quality = <...>, top_k = <...>
+<<<<<<< HEAD
+Group ID: <G03>      Thresholds from data/params.json: min_depth = <...>, min_quality = <...>, top_k = <...>
+=======
+Group ID: <METAFOUR>      Thresholds from data/params.json: min_depth = <...>, min_quality = <...>, top_k = <...>
+>>>>>>> 464fcb4a3dd776cbc0df7a3f5222fecbfeb78efe
 
 ## 1. Decomposition
 
@@ -19,6 +23,40 @@ Group ID: <your group id>      Thresholds from data/params.json: min_depth = <..
 
 *Give either structured pseudocode (indentation, IF / ELSE, RETURN) or a flowchart (a picture file
 committed in docs/ and linked here, or a Mermaid block). Show all six rules.*
+FUNCTION classify_variant(row, params):
+# Extract and clean input 
+depth <- INTEGER (row["depth])
+quality <- INTEGER (row["quality"])
+gene <- UPPERCASE(STRIP(row["gene"]))
+impact <- LOWERCASE(STRIP(row["impact"]))
+
+# Extract thresholds and priority gene set from params 
+min_depth <- INTEGER(params["min_depth"])
+min_quality <- INTEGER(params["min_quality"])
+priority_genes <- SET of UPPERCASE(STRIP(g)) for g in params["priority_genes"]
+
+# Apply rules in strict priority order (first match wins)
+IF depth < min_depth
+    THEN 
+        RETURN ("exclude", "Rule 1: low depth " + depth + " < min_depth " + min_depth)
+ELSE IF quality < min_quality
+    THEN 
+        RETURN ("exclude", "Rule 2: low quality " + quality + " < min_quality " + min_quality)
+ELSE IF gene IN priority_genes AND impact IN {"high", "moderate"}
+    THEN 
+        RETURN ("prioritize", "Rule 3: priority gene " + gene + " with " + impact + " impact") 
+ELSE IF gene IN priority_genes AND impact IN {"low", "modifier"}
+    THEN 
+        RETURN ("review", "Rule 4: priority gene " + gene + " with " + impact + " impact")
+ELSE IF gene NOT IN priority_genes AND impact IN {"high", "moderate"}
+    THEN 
+        RETURN ("review", "Rule 5: non-priority gene " + gene + " with " + impact + " impact")
+ELSE 
+    RETURN ("exclude", "Rule 6: non-priority gene " + gene + " with " + impact + " impact")
+
+    END IF 
+END FUNCTION 
+
 
 ## 3. Hand trace
 

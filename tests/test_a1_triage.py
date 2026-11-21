@@ -260,7 +260,7 @@ def test_format_report_structure_and_content() -> None:
 
     report = build_report(rows, G03_PARAMS)
     assert isinstance(report, str)
-    assert report.startswith("Report Summary")
+    assert report.startswith("Clinical Variant Triage Report")
     assert report.count("\n") > 5
 
     def test_cli_execution_and_output(tmp_path: Path) -> None:

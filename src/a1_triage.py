@@ -194,15 +194,18 @@ def rank_variants(results: list[dict], k: int) -> list[dict]:
     if k == 0 :
         return []
 
-    candidates = [item for item in results if item["decision"] != "exclude"]
+    candidates = [
+        item 
+        for item in results 
+        if str(item["decision"]).strip().casefold()!= "exclude"]
 
     def sort_key(item: dict[str, str]) -> tuple[int, int, int, int, int]:
         return(
-            DECISION_PRIORITY_ORDER[item["decision"].strip().casefold()],
-            IMPACT_PRIORITY_ORDER[item["impact"].strip().casefold()],
-            -int(str(item["quality"].strip())),
-            -int(str(item["depth"].strip())),
-            int(str(item["pos"].strip()))
+            DECISION_PRIORITY_ORDER[str(item["decision"]).strip().casefold()],
+            IMPACT_PRIORITY_ORDER[str(item["impact"]).strip().casefold()],
+            -int(str(item["quality"]).strip()),
+            -int(str(item["depth"]).strip()),
+            int(str(item["pos"]).strip())
         )
 
     return sorted(candidates, key=sort_key)[:k]
@@ -240,28 +243,23 @@ def build_report(results: list[dict], params: dict) -> str:
     top_variants = rank_variants(results, top_k)
     
     lines = [
-            "Clinical Variant Triage Report",
-            f"Thresholds: min_depth={min_depth} min_quality={min_quality}",
-            f"Priority genes: {', '.join(priority_genes)}",
-            f"Variants: {len(results)}",
-        ]
-    
+        "Clinical Variant Triage Report",
+        f"Thresholds: min_depth={min_depth} min_quality={min_quality}",
+        f"Priority genes: {', '.join(priority_genes)}",
+        f"Variants: {len(results)}",
+    ]
+
     for decision, count in decision_counts_dict.items():
-            lines.append(f"{decision}: {count}")
-    
+        lines.append(f"{decision}: {count}")
+
     lines.append("")
-    
     lines.append("Top K variants")
-    for i, variant in enumerate(top_variants, start=1):
-            lines.append(f"{i}. {variant['variant']} | {variant['gene']} | {variant['impact']} | {variant['decision']}")
-    
-    for rank, row in enumerate(top_variants, start=1):
-            variant = row["variant"]
-            gene = row["gene"]
-            impact = row["impact"]
-            decision = row["decision"]
-            lines.append(f"{rank}. {variant} | {gene} | {impact} | {decision}")
-    
+    for rank, variant in enumerate(top_variants, start=1):
+        lines.append(
+            f"{rank}. {variant['variant']} | {variant['gene']} | "
+            f"{variant['impact']} | {variant['decision']}"
+        )
+
     return "\n".join(lines) + "\n"
     
 

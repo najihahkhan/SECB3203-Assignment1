@@ -85,7 +85,23 @@ def rank_variants(results: list[dict], k: int) -> list[dict]:
     Raises:
         ValueError: if k is negative.
     """
-    raise NotImplementedError("TODO: implement rank_variants")
+    if k < 0 :
+        raise ValueError("k must be a non-negative integer")
+    if k == 0 :
+        return []
+
+    candidates = [item for item in results if item["decision"] != "exclude"]
+
+    def sort_key(item: dict[str, str]) -> tuple[int, int, int, int, int]:
+        return(
+            DECISION_PRIORITY_ORDER[item["decision"].strip().casefold()],
+            IMPACT_PRIORITY_ORDER[item["impact"].strip().casefold()],
+            -int(str(item["quality"].strip())),
+            -int(str(item["depth"].strip())),
+            int(str(item["pos"].strip()))
+        )
+
+    return sorted(candidates, key=sort_key)[:k]
 
 
 def results_to_csv(results: list[dict]) -> str:

@@ -74,3 +74,57 @@ def test_triage_messy_inputs_and_immutability():
     # Ensure original input list and dicts were not mutated
     assert original_rows == snapshot
     assert "decision" not in original_rows[0]
+
+
+EXCLUDED_DECISION ="exclude"
+DECISION_KEYS = ("prioritize", "review", "exclude")
+IMPACT_KEYS = ("high", "moderate", "low", "modifier")
+MEAN_DEPTH_PRECISION = 1
+
+def decision_counts(results: list[dict]) -> dict[str, int]:
+    counts = {key: 0 for key in DECISION_KEYS}
+    for row in results:
+        decision = str(row["decision"]).strip().lower()
+        if decision == EXCLUDED_DECISION:
+            continue
+        impact = str(row["impact"]).strip().lower()
+        if impact in counts:
+            counts[impact] += 1
+        return counts
+
+def gene_summary(results: list[dict]) -> dict[str, dict[str, int | float]]:
+    if not results:
+        return {}
+
+    grouped: dict[str, dict[str, int]] = {}
+    for row in results:
+        gene = str(row["gene"]).strip().upper()
+        decision = str(row["decision"]).strip().lower()
+        depth = int(row["depth"])
+
+        if gene not in grouped:
+            grouped[gene] = {
+                "total": 0,
+                "prioritize": 0,
+                "review": 0,
+                "exclude": 0,
+                "depth_sum": 0,
+            }
+
+        grouped[gene]["total"] += 1
+        grouped[gene]["depth_sum"] += depth
+        if decision in ("prioritize", "review", "exclude"):
+            grouped[gene][decision] += 1
+
+    summary: dict[str, dict[str, int | float]] = {}
+    for gene in sorted(grouped.keys()):
+        stats = grouped[gene]
+        mean_depth = round(stats["depth_sum"] / stats["total"], MEAN_DEPTH_PRECISION)
+        summary[gene] = {
+            "total": stats["total"],
+            "prioritize": stats["prioritize"],
+            "review": stats["review"],
+            "exclude": stats["exclude"],
+            "mean_depth": mean_depth,
+        }
+    return summary

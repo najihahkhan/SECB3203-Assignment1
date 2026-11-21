@@ -129,8 +129,41 @@ def gene_summary(results: list[dict]) -> dict[str, dict]:
     Each value is {"total": n, "prioritize": a, "review": b, "exclude": c, "mean_depth": d}
     where mean_depth is the mean depth of ALL the gene's variants, rounded to 1 decimal.
     """
-    raise NotImplementedError("TODO: implement gene_summary")
+    if not results:
+        return {}
 
+    grouped: dict[str, dict[str, int]] = {}
+    for row in results:
+        gene = str(row["gene"]).strip().upper()
+        decision= str(row["decision"]).strip().lower()
+        depth= int(row["depth"])
+
+        if gene not in grouped:
+            grouped[gene] = {
+                "total": 0,
+                "prioritize": 0,
+                "review": 0,
+                "exclude": 0,
+                "depth_sum": 0,
+            }
+
+        grouped[gene]["total"] += 1
+        grouped[gene]["depth_sum"] += depth
+        if decision in ("prioritize", "review", "exclude"):
+            grouped[gene][decision] += 1
+
+    summary: dict[str, dict[str, int | float]] = {}
+    for gene in sorted(grouped.keys()):
+        stats = grouped[gene]
+        mean_depth = round(stats["depth_sum"] / stats["total"], 1)
+        summary[gene] = {
+            "total": stats["total"],
+            "prioritize": stats["prioritize"],
+            "review": stats["review"],
+            "exclude": stats["exclude"],
+            "mean_depth": mean_depth,
+        }
+    return summary
 
 MIN_K: int = 0
 

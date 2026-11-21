@@ -9,11 +9,11 @@ Group ID: <G03>      Thresholds from data/params.json: min_depth = <...>, min_qu
 
 | Question | Our answer |
 |---|---|
-| Input | |
-| Output | |
-| Constraints (named thresholds, what happens at exactly the threshold) | |
-| Rule order and why the order matters | |
-| Out of scope | |
+| Input |variants.csv: A ccsv file containing the variant call records here all values are read as strings initially.|
+| Output |results/triage.csv: Output CSV file keeping all original variant columns and adding 'decision', 'reason' columns in the same row order.|
+| Constraints (named thresholds, what happens at exactly the threshold) |Dynamic Parameter: All threshold values must be taken from 'params.json' rather than hardcoded.|
+| Rule order and why the order matters |Rules 1 to 6 are checked one by one from top to bottom. Once a rule matches, its decision and reason are returned immediately and the remaining rules are skipped.|
+| Out of scope |Clinical diagnosis: This prgram uses synthetic teaching data only and is not meant for real medical or clinical advice.|
 
 ## 2. Pseudocode or flowchart of classify_variant
 

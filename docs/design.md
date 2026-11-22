@@ -3,17 +3,17 @@
 Write this BEFORE you write the code, then keep it up to date. It is marked by the lecturer.
 Use your own words, your own thresholds and your own data. Delete the guidance in italics.
 
-Group ID: <G03>      Thresholds from data/params.json: min_depth = <...>, min_quality = <...>, top_k = <...>
+Group ID: G03      Thresholds from data/params.json: min_depth = <...>, min_quality = <...>, top_k = <...>
 
 ## 1. Decomposition
 
 | Question | Our answer |
 |---|---|
-| Input |variants.csv: A ccsv file containing the variant call records here all values are read as strings initially.|
+| Input |variants.csv: A csv file containing the variant call records here all values are read as strings initially.|
 | Output |results/triage.csv: Output CSV file keeping all original variant columns and adding 'decision', 'reason' columns in the same row order.|
 | Constraints (named thresholds, what happens at exactly the threshold) |Dynamic Parameter: All threshold values must be taken from 'params.json' rather than hardcoded.|
 | Rule order and why the order matters |Rules 1 to 6 are checked one by one from top to bottom. Once a rule matches, its decision and reason are returned immediately and the remaining rules are skipped.|
-| Out of scope |Clinical diagnosis: This prgram uses synthetic teaching data only and is not meant for real medical or clinical advice.|
+| Out of scope |Clinical diagnosis: This program uses synthetic teaching data only and is not meant for real medical or clinical advice.|
 
 ## 2. Pseudocode or flowchart of classify_variant
 
@@ -79,8 +79,8 @@ awkward input (empty list, k = 0, k larger than the data, messy text). One line 
 | --- | --- | --- | --- |
 | T01 | Normal | Valid priority gene with 'high' impact,depth and quality well above thresholds. | Classified as '"prioritize"' (Rule 3) and included in top-k output. |
 | T02 | Normal | Valid priority gene with 'low' impact,depth and quality well above thresholds. | Classified as '"review"' (Rule 4) |
-| T03 | Normal | Valid priority gene with 'moderate' impact,depth and quality well above thresholds. | Classified as '"exclude"' (Rule 5) |
-| T04 | Normal | Valid priority gene with 'modifier' impact,depth and quality well above thresholds. | Classified as '"exclude"' (Rule 6) |
+| T03 | Normal | Valid priority gene with 'moderate' impact,depth and quality well above thresholds. | Classified as `Review` (Rule 5) |
+| T04 | Normal | Valid priority gene with 'modifier' impact,depth and quality well above thresholds. | Classified as `exclude` (Rule 6) and exclude from top k ranking. |
 | T05 | Boundary | Depth equals `<min_depth>` (exact threshold) and quality equals `<min_quality>` (exact threshold). | Passes Rules 1 and 2; proceeds to gene/impact evaluation (Rules 3–6). |
 | T06 | Boundary | Depth equals `<min_depth - 1>` (one below threshold) with high quality and priority gene. | Immediately classified as `"exclude"` (Rule 1). |
 | T07 | Boundary | Depth equals `<min_depth + 1>` (one above threshold), quality equals `<min_quality - 1>` (one below). | Passes Rule 1, immediately classified as `"exclude"` (Rule 2). |
@@ -90,7 +90,7 @@ awkward input (empty list, k = 0, k larger than the data, messy text). One line 
 | T11 | Awkward | Empty input list (`[]` / CSV with header row only and zero variant rows). | Completes cleanly without crashing; counts are all `0` and report displays empty sections. |
 | T12 | Awkward | Messy text formatting in CSV fields (e.g., `"  brca1 "`, `" HIGH\n"`, `"MoDeRaTe"`). | Whitespace stripped and case normalized; matches priority genes and impacts accurately. |
 | T13 | Awkward | Tie-breaking on sorting/ranking when two variants share identical priority/scores. | Deterministic ordering applied consistently across repeated runs. |
-| T14 | Invalid | Missing required dictionary key or non-numeric string in `depth`/`quality` (e.g., `"N/A"`). | Raises `ValueError` or `KeyError` cleanly as expected by input validation. |
+| T14 | Invalid | Missing required dictionary key or non-numeric string in `depth`/`quality` (e.g., `"N/A"`). | Raises ValueError cleanly.|
 | T15 | Report/CLI | Full end-to-end execution of `build_report(results, params)` and CLI invocation. | Output matches exact required text layout, headers, summary counts, and exit code `0`. |
 ## 5. Work plan
 

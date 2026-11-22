@@ -129,8 +129,41 @@ def gene_summary(results: list[dict]) -> dict[str, dict]:
     Each value is {"total": n, "prioritize": a, "review": b, "exclude": c, "mean_depth": d}
     where mean_depth is the mean depth of ALL the gene's variants, rounded to 1 decimal.
     """
-    raise NotImplementedError("TODO: implement gene_summary")
+    if not results:
+        return {}
 
+    grouped: dict[str, dict[str, int]] = {}
+    for row in results:
+        gene = str(row["gene"]).strip().upper()
+        decision= str(row["decision"]).strip().lower()
+        depth= int(row["depth"])
+
+        if gene not in grouped:
+            grouped[gene] = {
+                "total": 0,
+                "prioritize": 0,
+                "review": 0,
+                "exclude": 0,
+                "depth_sum": 0,
+            }
+
+        grouped[gene]["total"] += 1
+        grouped[gene]["depth_sum"] += depth
+        if decision in ("prioritize", "review", "exclude"):
+            grouped[gene][decision] += 1
+
+    summary: dict[str, dict[str, int | float]] = {}
+    for gene in sorted(grouped.keys()):
+        stats = grouped[gene]
+        mean_depth = round(stats["depth_sum"] / stats["total"], 1)
+        summary[gene] = {
+            "total": stats["total"],
+            "prioritize": stats["prioritize"],
+            "review": stats["review"],
+            "exclude": stats["exclude"],
+            "mean_depth": mean_depth,
+        }
+    return summary
 
 MIN_K: int = 0
 
@@ -161,15 +194,18 @@ def rank_variants(results: list[dict], k: int) -> list[dict]:
     if k == 0 :
         return []
 
-    candidates = [item for item in results if item["decision"] != "exclude"]
+    candidates = [
+        item 
+        for item in results 
+        if str(item["decision"]).strip().casefold()!= "exclude"]
 
     def sort_key(item: dict[str, str]) -> tuple[int, int, int, int, int]:
         return(
-            DECISION_PRIORITY_ORDER[item["decision"].strip().casefold()],
-            IMPACT_PRIORITY_ORDER[item["impact"].strip().casefold()],
-            -int(str(item["quality"].strip())),
-            -int(str(item["depth"].strip())),
-            int(str(item["pos"].strip()))
+            DECISION_PRIORITY_ORDER[str(item["decision"]).strip().casefold()],
+            IMPACT_PRIORITY_ORDER[str(item["impact"]).strip().casefold()],
+            -int(str(item["quality"]).strip()),
+            -int(str(item["depth"]).strip()),
+            int(str(item["pos"]).strip())
         )
 
     return sorted(candidates, key=sort_key)[:k]
@@ -180,7 +216,16 @@ def results_to_csv(results: list[dict]) -> str:
 
     Every line ends with a newline. Reason text contains no commas, so no quoting is needed.
     """
-    raise NotImplementedError("TODO: implement results_to_csv")
+    header = ",".join(CSV_COLUMNS) + "\n"
+    if not results:
+        return header
+
+    lines = [header]
+    for row in results:
+        values = [str(row[col]) for col in CSV_COLUMNS]
+        lines.append(",".join(values) + "\n")
+
+    return "".join(lines)
 
 
 def build_report(results: list[dict], params: dict) -> str:
@@ -190,7 +235,33 @@ def build_report(results: list[dict], params: dict) -> str:
     'Variants: N', one 'decision: count' line per decision, a blank line,
     'Top K variants' and then 'rank. variant | gene | impact | decision' lines.
     """
-    raise NotImplementedError("TODO: implement build_report")
+    min_depth = int(params["min_depth"])
+    min_quality = int(params["min_quality"])
+    top_k = int(params["top_k"])
+    priority_genes = sorted({str(g).strip().upper() for g in params["priority_genes"]})
+    decision_counts_dict = decision_counts(results)
+    top_variants = rank_variants(results, top_k)
+    
+    lines = [
+        "Clinical Variant Triage Report",
+        f"Thresholds: min_depth={min_depth} min_quality={min_quality}",
+        f"Priority genes: {', '.join(priority_genes)}",
+        f"Variants: {len(results)}",
+    ]
+
+    for decision, count in decision_counts_dict.items():
+        lines.append(f"{decision}: {count}")
+
+    lines.append("")
+    lines.append("Top K variants")
+    for rank, variant in enumerate(top_variants, start=1):
+        lines.append(
+            f"{rank}. {variant['variant']} | {variant['gene']} | "
+            f"{variant['impact']} | {variant['decision']}"
+        )
+
+    return "\n".join(lines) + "\n"
+    
 
 
 def main(argv: list[str] | None = None) -> int:

@@ -1,4 +1,8 @@
-from src.a1_triage import classify_variant, triage
+from pathlib import Path
+import subprocess
+import sys
+import pytest
+from src.a1_triage import classify_variant, triage, decision_counts, gene_summary, CSV_COLUMNS, rank_variants, results_to_csv, build_report
 
 G03_PARAMS = {
     "min_depth": 12,
@@ -74,3 +78,208 @@ def test_triage_messy_inputs_and_immutability():
     # Ensure original input list and dicts were not mutated
     assert original_rows == snapshot
     assert "decision" not in original_rows[0]
+
+
+EXCLUDED_DECISION ="exclude"
+DECISION_KEYS = ("prioritize", "review", "exclude")
+IMPACT_KEYS = ("high", "moderate", "low", "modifier")
+MEAN_DEPTH_PRECISION = 1
+
+def decision_counts(results: list[dict]) -> dict[str, int]:
+    counts = {key: 0 for key in DECISION_KEYS}
+    for row in results:
+        decision = str(row["decision"]).strip().lower()
+        if decision == EXCLUDED_DECISION:
+            continue
+        impact = str(row["impact"]).strip().lower()
+        if impact in counts:
+            counts[impact] += 1
+    return counts
+
+def gene_summary(results: list[dict]) -> dict[str, dict[str, int | float]]:
+    if not results:
+        return {}
+
+    grouped: dict[str, dict[str, int]] = {}
+    for row in results:
+        gene = str(row["gene"]).strip().upper()
+        decision = str(row["decision"]).strip().lower()
+        depth = int(row["depth"])
+
+        if gene not in grouped:
+            grouped[gene] = {
+                "total": 0,
+                "prioritize": 0,
+                "review": 0,
+                "exclude": 0,
+                "depth_sum": 0,
+            }
+
+        grouped[gene]["total"] += 1
+        grouped[gene]["depth_sum"] += depth
+        if decision in ("prioritize", "review", "exclude"):
+            grouped[gene][decision] += 1
+
+    summary: dict[str, dict[str, int | float]] = {}
+    for gene in sorted(grouped.keys()):
+        stats = grouped[gene]
+        mean_depth = round(stats["depth_sum"] / stats["total"], MEAN_DEPTH_PRECISION)
+        summary[gene] = {
+            "total": stats["total"],
+            "prioritize": stats["prioritize"],
+            "review": stats["review"],
+            "exclude": stats["exclude"],
+            "mean_depth": mean_depth,
+        }
+    return summary
+
+
+def test_rank_variants_order_tie_breakers_and_k_cases() -> None:
+    """Cover ranking tie-breakers, exclusion filtering, k=0, k > total, and negative k."""
+    rows = [
+        {
+            "variant": "v_excl",
+            "gene": "G1",
+            "chrom": "chr1",
+            "pos": 50,
+            "depth": 90,
+            "quality": 95,
+            "impact": "high",
+            "decision": "exclude",
+            "reason": "Rule 1 depth below threshold",
+        },
+        {
+            "variant": "v_pos_later",
+            "gene": "G1",
+            "chrom": "chr1",
+            "pos": 300,
+            "depth": 60,
+            "quality": 90,
+            "impact": "high",
+            "decision": "prioritize",
+            "reason": "Rule 3 priority gene G1 with high impact",
+        },
+        {
+            "variant": "v_pos_earlier",
+            "gene": "G1",
+            "chrom": "chr1",
+            "pos": 150,
+            "depth": 60,
+            "quality": 90,
+            "impact": "high",
+            "decision": "prioritize",
+            "reason": "Rule 3 priority gene G1 with high impact",
+        },
+        {
+            "variant": "v_review",
+            "gene": "G2",
+            "chrom": "chr1",
+            "pos": 100,
+            "depth": 80,
+            "quality": 99,
+            "impact": "high",
+            "decision": "review",
+            "reason": "Rule 5 non-priority gene G2 with high impact",
+        },
+    ]
+
+    ranked = rank_variants(rows, k=10)
+    assert [r["variant"] for r in ranked] == [
+        "v_pos_earlier",
+        "v_pos_later",
+        "v_review",
+    ]
+    assert rank_variants(rows, k=0) == []
+
+    with pytest.raises(ValueError):
+        rank_variants(rows, k=-1)
+
+
+def test_results_to_csv_header_and_rows() -> None:
+    """Cover exact CSV header and newline-terminated lines."""
+    rows = [
+        {
+            "variant": "v1",
+            "gene": "G1",
+            "chrom": "chr1",
+            "pos": 100,
+            "depth": 50,
+            "quality": 85,
+            "impact": "high",
+            "decision": "prioritize",
+            "reason": "Rule 3 priority gene G1 with high impact",
+        },
+    ]
+
+    csv_text = results_to_csv(rows)
+    lines = csv_text.splitlines(keepends=True)
+
+    assert lines[0] == ",".join(CSV_COLUMNS) + "\n"
+    assert lines[1] == (
+        "v1,G1,chr1,100,50,85,high,prioritize,"
+        "Rule 3 priority gene G1 with high impact\n"
+    ) 
+
+def test_format_report_structure_and_content() -> None:
+    """Cover report structure, header, and content for a small example."""
+    rows = [
+        {
+            "variant": "rs101",
+            "gene": "BRCA2",
+            "chrom": "chr13",
+            "pos": 32315474,
+            "depth": 45,
+            "quality": 92,
+            "impact": "high",
+            "decision": "prioritize",
+            "reason": "Rule 3 priority gene BRCA2 with high impact",
+        },
+        {
+            "variant": "rs202",
+            "gene": "TP53",
+            "chrom": "chr17",
+            "pos": 7675088,
+            "depth": 30,
+            "quality": 88,
+            "impact": "moderate",
+            "decision": "review",
+            "reason": "Rule 5 non-priority gene TP53 with moderate impact",
+        },
+        {
+            "variant": "rs303",
+            "gene": "EGFR",
+            "chrom": "chr7",
+            "pos": 5524231,
+            "depth": 50,
+            "quality": 67,
+            "impact": "low",
+            "decision": "exclude",
+            "reason": "Rule 2 quality below threshold",
+        },
+    ]
+
+    report = build_report(rows, G03_PARAMS)
+    assert isinstance(report, str)
+    assert report.startswith("Clinical Variant Triage Report")
+    assert report.count("\n") > 5
+
+    def test_cli_execution_and_output(tmp_path: Path) -> None:
+        input_csv = tmp_path / "variants.csv"
+        input_csv.write_text(
+            "variant,gene,chrom,pos,depth,quality,impact\n"
+            "rs101,BRCA2,chr13,32315474,45,92,high\n"
+            "rs202,TP53,chr17,7675088,30,88,moderate\n"
+            "rs303,EGFR,chr7,5524231,50,67,low\n"
+        )
+
+        output_csv = tmp_path / "triaged_variants.csv"
+
+        result = subprocess.run(
+            [ sys.executable, "-m", "src.a1_triage", "--input", str(input_csv), "--output", str(output_csv) ],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+
+        assert result.returncode == 0
+        assert output_csv.exists()

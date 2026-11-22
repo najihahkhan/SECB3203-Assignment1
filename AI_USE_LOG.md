@@ -9,8 +9,8 @@
                 ALLISYA MAISARAH BINTI SURAIZAL (A24CS0044)
                 NUR ANISAH SOLEHAH BINTI MOHD HAMIM (A24CS0157)
 - Group ID: G03
-- AI level: <1>
-- Group ID: <03> 
+- AI level: 1
+- Group ID: 03
 
 ## Declaration (tick exactly one)
 
@@ -28,7 +28,7 @@ Name : NUR ANISAH SOLEHAH BINTI MOHD HAMIM , Matric No : A24CS0157
 - My change: Used the guidance to understand the rule ordering, edge cases, and Git/linting workflow, then wrote and formatted my pseudocode in `docs/design.md`, implemented `classify_variant` and `triage` in `src/a1_triage.py`, and created unit tests in `tests/test_a1_triage.py` using Group 3's exact parameters.
 
 Name : ALISYA HUMAYRAA BT MOHD KHAIRANI , Matric No : A24CS0043
-# ENTRY 2
+## Entry 2
 - Date: 22 November 2026, 3:00 PM
 - Tool: Google (2026). Gemini. Retrieved 22 November 2026 from https://gemini.google.com
 - Purpose: explain
@@ -40,7 +40,6 @@ Name : ALISYA HUMAYRAA BT MOHD KHAIRANI , Matric No : A24CS0043
 
 Name: ALLISYA MAISARAH BINTI SURAIZAL  Matric No: A24CS0044
 ## Entry 3
-
 - Date: 22 November 2026, 9:58 PM
 - Tool: Google (2026). Gemini. Retrieved 22 November 2026 from https://gemini.google.com
 - Purpose: review
@@ -51,9 +50,9 @@ Name: ALLISYA MAISARAH BINTI SURAIZAL  Matric No: A24CS0044
 
 Name: Najihah Binti Azhan Khan Matric No: A24CS0144
 ## Entry 4
-- Date: 2026-11-22 (Note: Update to the actual date/time you ran this prompt before submission)
+- Date: 22/11/2026
 - Tool: Google, Gemini, accessed 22 November 2026, https://gemini.google.com/
-- Purpose: other (work distribution and project planning)
+- Purpose: debug and other (work distribution and project planning)
 - Prompt: "I need you to divide this work for 4 members equally" (with SECB3203_assignment1_student.docx attached) followed by "can you do it in bullet points form"
 - Output: Proposed a 3-phase equal workload breakdown across 4 team members covering docs/design.md, the 8 functions in src/a1_triage.py, unit tests in tests/test_a1_triage.py, README.md, and minimum Git commit milestones.
 - Verified by: Cross-checked the suggested task list against the function specifications, deliverables, and marking rubric (R1–R15, M1–M4) in SECB3203_assignment1_student.docx.

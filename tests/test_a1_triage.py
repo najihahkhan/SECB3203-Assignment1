@@ -1,8 +1,19 @@
+import json
 from pathlib import Path
 import subprocess
 import sys
 import pytest
-from src.a1_triage import classify_variant, triage, decision_counts, gene_summary, CSV_COLUMNS, rank_variants, results_to_csv, build_report
+from src.a1_triage import (
+    CSV_COLUMNS,
+    build_report,
+    classify_variant,
+    decision_counts,
+    gene_summary,
+    impact_counts,
+    rank_variants,
+    results_to_csv,
+    triage,
+)
 
 G03_PARAMS = {
     "min_depth": 12,
@@ -80,58 +91,35 @@ def test_triage_messy_inputs_and_immutability():
     assert "decision" not in original_rows[0]
 
 
-EXCLUDED_DECISION ="exclude"
-DECISION_KEYS = ("prioritize", "review", "exclude")
-IMPACT_KEYS = ("high", "moderate", "low", "modifier")
-MEAN_DEPTH_PRECISION = 1
+def test_decision_and_impact_counts() -> None:
+    """Verify decision_counts includes all keys and impact_counts skips excluded rows."""
+    rows = [
+        {"decision": "prioritize", "impact": "high"},
+        {"decision": "review", "impact": "moderate"},
+        {"decision": "exclude", "impact": "high"},
+    ]
+    assert decision_counts(rows) == {"prioritize": 1, "review": 1, "exclude": 1}
+    assert impact_counts(rows) == {"high": 1, "moderate": 1, "low": 0, "modifier": 0}
+    assert decision_counts([]) == {"prioritize": 0, "review": 0, "exclude": 0}
 
-def decision_counts(results: list[dict]) -> dict[str, int]:
-    counts = {key: 0 for key in DECISION_KEYS}
-    for row in results:
-        decision = str(row["decision"]).strip().lower()
-        if decision == EXCLUDED_DECISION:
-            continue
-        impact = str(row["impact"]).strip().lower()
-        if impact in counts:
-            counts[impact] += 1
-    return counts
 
-def gene_summary(results: list[dict]) -> dict[str, dict[str, int | float]]:
-    if not results:
-        return {}
-
-    grouped: dict[str, dict[str, int]] = {}
-    for row in results:
-        gene = str(row["gene"]).strip().upper()
-        decision = str(row["decision"]).strip().lower()
-        depth = int(row["depth"])
-
-        if gene not in grouped:
-            grouped[gene] = {
-                "total": 0,
-                "prioritize": 0,
-                "review": 0,
-                "exclude": 0,
-                "depth_sum": 0,
-            }
-
-        grouped[gene]["total"] += 1
-        grouped[gene]["depth_sum"] += depth
-        if decision in ("prioritize", "review", "exclude"):
-            grouped[gene][decision] += 1
-
-    summary: dict[str, dict[str, int | float]] = {}
-    for gene in sorted(grouped.keys()):
-        stats = grouped[gene]
-        mean_depth = round(stats["depth_sum"] / stats["total"], MEAN_DEPTH_PRECISION)
-        summary[gene] = {
-            "total": stats["total"],
-            "prioritize": stats["prioritize"],
-            "review": stats["review"],
-            "exclude": stats["exclude"],
-            "mean_depth": mean_depth,
-        }
-    return summary
+def test_gene_summary_alphabetical_and_mean_depth() -> None:
+    """Verify per-gene counts, alphabetical key order, and 1-decimal mean depth."""
+    rows = [
+        {"gene": "TP53", "decision": "review", "depth": 30},
+        {"gene": "BRCA2", "decision": "prioritize", "depth": 40},
+        {"gene": "BRCA2", "decision": "exclude", "depth": 11},
+    ]
+    summary = gene_summary(rows)
+    assert list(summary.keys()) == ["BRCA2", "TP53"]
+    assert summary["BRCA2"] == {
+        "total": 2,
+        "prioritize": 1,
+        "review": 0,
+        "exclude": 1,
+        "mean_depth": 25.5,
+    }
+    assert gene_summary([]) == {}
 
 
 def test_rank_variants_order_tie_breakers_and_k_cases() -> None:
@@ -218,7 +206,8 @@ def test_results_to_csv_header_and_rows() -> None:
     assert lines[1] == (
         "v1,G1,chr1,100,50,85,high,prioritize,"
         "Rule 3 priority gene G1 with high impact\n"
-    ) 
+    )
+
 
 def test_format_report_structure_and_content() -> None:
     """Cover report structure, header, and content for a small example."""
@@ -263,23 +252,28 @@ def test_format_report_structure_and_content() -> None:
     assert report.startswith("Clinical Variant Triage Report")
     assert report.count("\n") > 5
 
-    def test_cli_execution_and_output(tmp_path: Path) -> None:
-        input_csv = tmp_path / "variants.csv"
-        input_csv.write_text(
-            "variant,gene,chrom,pos,depth,quality,impact\n"
-            "rs101,BRCA2,chr13,32315474,45,92,high\n"
-            "rs202,TP53,chr17,7675088,30,88,moderate\n"
-            "rs303,EGFR,chr7,5524231,50,67,low\n"
-        )
 
-        output_csv = tmp_path / "triaged_variants.csv"
+def test_cli_execution_and_output(tmp_path: Path) -> None:
+    """Verify CLI creates triage.csv and report.txt and exits 0."""
+    input_csv = tmp_path / "variants.csv"
+    input_csv.write_text(
+        "variant,gene,chrom,pos,depth,quality,impact\n"
+        "rs101,BRCA2,chr13,32315474,45,92,high\n"
+        "rs202,TP53,chr17,7675088,30,88,moderate\n"
+        "rs303,EGFR,chr7,5524231,50,67,low\n",
+        encoding="utf-8",
+    )
+    params_json = tmp_path / "params.json"
+    params_json.write_text(json.dumps(G03_PARAMS), encoding="utf-8")
+    out_dir = tmp_path / "results"
 
-        result = subprocess.run(
-            [ sys.executable, "-m", "src.a1_triage", "--input", str(input_csv), "--output", str(output_csv) ],
-            capture_output=True,
-            text=True,
-            check=True,
-        )
+    result = subprocess.run(
+        [sys.executable, "src/a1_triage.py", str(input_csv), str(params_json), str(out_dir)],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
 
-        assert result.returncode == 0
-        assert output_csv.exists()
+    assert result.returncode == 0
+    assert (out_dir / "triage.csv").exists()
+    assert (out_dir / "report.txt").exists()

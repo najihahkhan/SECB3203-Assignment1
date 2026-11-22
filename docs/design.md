@@ -61,7 +61,14 @@ your choice that reach rules 3 to 6. Do it by hand BEFORE you run your code, the
 
 | Variant | Gene | Depth | Quality | Impact | Rule that fires | Decision | Reason |
 |---|---|---|---|---|---|---|---|
-| v1 | | | | | | | |
+| v1 | APC | 9 | 90 | modifier | Rule 1 | exclude | Rule 1: depth 9 below min_depth 12 |
+| v2 | RB1 | 10 | 90 | high | Rule 1 | exclude | Rule 1: depth 10 below min_depth 12 |
+| v3 | PTEN | 11 | 90 | moderate | Rule 1 | exclude | Rule 1: depth 11 below min_depth 12 |
+| v4 | PTEN | 30 | 79 | low | Rule 4 | review | Rule 4: priority gene PTEN with low impact |
+| v5 | TP53 | 30 | 80 | high | Rule 5 | review | Rule 5: non-priority gene TP53 with high impact |
+| v6 | TP53 | 30 | 81 | moderate | Rule 5 | review | Rule 5: non-priority gene TP53 with moderate impact |
+| v7 | BRCA1 | 31 | 86 | moderate | Rule 5 | review | Rule 5: non-priority gene BRCA1 with moderate impact |
+| v8 | KRAS | 20 | 89 | high | Rule 5 | review | Rule 5: non-priority gene KRAS with high impact |
 
 ## 4. Test plan
 

@@ -195,8 +195,8 @@ def rank_variants(results: list[dict], k: int) -> list[dict]:
         return []
 
     candidates = [
-        item 
-        for item in results 
+        item
+        for item in results
         if str(item["decision"]).strip().casefold()!= "exclude"]
 
     def sort_key(item: dict[str, str]) -> tuple[int, int, int, int, int]:
@@ -241,7 +241,7 @@ def build_report(results: list[dict], params: dict) -> str:
     priority_genes = sorted({str(g).strip().upper() for g in params["priority_genes"]})
     decision_counts_dict = decision_counts(results)
     top_variants = rank_variants(results, top_k)
-    
+
     lines = [
         "Clinical Variant Triage Report",
         f"Thresholds: min_depth={min_depth} min_quality={min_quality}",
@@ -261,7 +261,7 @@ def build_report(results: list[dict], params: dict) -> str:
         )
 
     return "\n".join(lines) + "\n"
-    
+
 
 
 def main(argv: list[str] | None = None) -> int:

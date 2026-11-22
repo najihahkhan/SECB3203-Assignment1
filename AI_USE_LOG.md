@@ -4,10 +4,17 @@
 
 - Course: SECB3203
 - Assessment: <Assignment 1 >
+<<<<<<< HEAD
 - Student name: <NUR ANISAH SOLEHAH BINTI MOHD HAMIM>
 - Matric no: <A24CS0157>
 - Group ID: <G03>
 - AI level: <1>
+=======
+- Student name: <>
+- Matric no: <>
+- Group ID: <03> 
+- AI level: <0, 1 or 2 - see the assessment brief>
+>>>>>>> d527dabea05d7b225a2305be4038ce52ec24a380
 - Tools cited: <UTM format, e.g. OpenAI (2026). ChatGPT (GPT-5). Retrieved 12 October 2026 from https://chat.openai.com>
 
 ## Declaration (tick exactly one)
@@ -15,7 +22,8 @@
 - [ ] NIL RETURN: I did not use any generative AI tool for this assessment.
 - [x] I used AI. Every interaction that influenced my work is logged below. The log is true and complete.
 
-## Entry 1
+## Entry 1 
+Name : Nur Anisah Solehah Binti Mohd Hamim A24CS0157
 
 - Date: 21 November 2026, 4:00 PM
 - Tool: Google (2026). Gemini. Retrieved 21 November 2026 from https://gemini.google.com
@@ -25,7 +33,6 @@
 - Verified by: ran pytest, ran ruff check, and compared logic against the docstrings in `src/a1_triage.py` and values in `data/params.json`
 - My change: Used the guidance to understand the rule ordering, edge cases, and Git/linting workflow, then wrote and formatted my pseudocode in `docs/design.md`, implemented `classify_variant` and `triage` in `src/a1_triage.py`, and created unit tests in `tests/test_a1_triage.py` using Group 3's exact parameters.
 
-## Entry 2(mayraa testing)
 
 - Date: 21 November 2026, 4:00 PM
 - Tool: Google (2026). Gemini. Retrieved 21 November 2026 from https://gemini.google.com
@@ -46,6 +53,7 @@ Name: ALLISYA MAISARAH BINTI SURAIZAL  Matric No: A24CS0044
 - Output: Confirmed there are no syntax errors and that the sorting order matches the docstring, while identifying potential edge-case issues including a `dict[str, str]` type annotation mismatch in `sort_key`, unhandled `KeyError` for missing keys or unrecognized `decision`/`impact` labels, unhandled `ValueError` for non-integer `quality`/`depth`/`pos` values, and missing boolean validation for `k`.
 - Verified by: ran pytest, ran ruff check, and compared logic against the docstrings in `src/a1_triage.py`
 - My change: Reviewed the edge-case feedback for `rank_variants`, updated the `sort_key` type annotation and validation handling where needed in `src/a1_triage.py`, and confirmed all unit tests pass.
+<<<<<<< HEAD
 
 Name: Najihah Binti Azhan Khan Matric No: A24CS0144
 ## Entry 1
@@ -63,3 +71,5 @@ Name: Najihah Binti Azhan Khan Matric No: A24CS0144
 - Signed: Alisya Humayraa Binti Mohd Khairani, A24CS0043, 22/11/2026
 - Signed: Allisya Maisarah Binti Suraizal, A24CS0044, 22/11/2026
 - Signed: Nur Anisah Solehah Binti Mohd Hamim, A24CS0157, 22/11/2026
+=======
+>>>>>>> d527dabea05d7b225a2305be4038ce52ec24a380

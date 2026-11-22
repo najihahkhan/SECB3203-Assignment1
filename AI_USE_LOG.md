@@ -3,22 +3,20 @@
 <!-- SECB3203 prompt log. Policy: PROPOSED - for approval by the SECB3203 course team before circulation to students. Fill in, then run: python tools/check_ai_log.py AI_USE_LOG.md --assessment <key> -->
 
 - Course: SECB3203
-- Assessment: <Assignment 1 >
-- Student name: <NUR ANISAH SOLEHAH BINTI MOHD HAMIM>
-- Matric no: <A24CS0157>
-- Group ID: <G03>
+- Assessment: Assignment 1
+- Student name:NAJIHAH BINTI AZHAN KHAN , ALISYA HUMAYRAA BINTI MOHD KHAIRANI , ALLISYA MAISARAH BINTI SURAIZAL , NUR ANISAH SOLEHAH BINTI MOHD HAMIM 
+- Matric no: A24CS0144,A24CS0043,A24CS0044,A24CS0157
+- Group ID: G03
 - AI level: <1>
 - Group ID: <03> 
-- Tools cited: <UTM format, e.g. OpenAI (2026). ChatGPT (GPT-5). Retrieved 12 October 2026 from https://chat.openai.com>
 
 ## Declaration (tick exactly one)
 
 - [ ] NIL RETURN: I did not use any generative AI tool for this assessment.
 - [x] I used AI. Every interaction that influenced my work is logged below. The log is true and complete.
 
+Name : NUR ANISAH SOLEHAH BINTI MOHD HAMIM , Matric No : A24CS0157 
 ## Entry 1 
-Name : Nur Anisah Solehah Binti Mohd Hamim A24CS0157
-
 - Date: 21 November 2026, 4:00 PM
 - Tool: Google (2026). Gemini. Retrieved 21 November 2026 from https://gemini.google.com
 - Purpose: explain
@@ -27,7 +25,7 @@ Name : Nur Anisah Solehah Binti Mohd Hamim A24CS0157
 - Verified by: ran pytest, ran ruff check, and compared logic against the docstrings in `src/a1_triage.py` and values in `data/params.json`
 - My change: Used the guidance to understand the rule ordering, edge cases, and Git/linting workflow, then wrote and formatted my pseudocode in `docs/design.md`, implemented `classify_variant` and `triage` in `src/a1_triage.py`, and created unit tests in `tests/test_a1_triage.py` using Group 3's exact parameters.
 
-
+# UBAH SINI YA MAYRA 
 - Date: 21 November 2026, 4:00 PM
 - Tool: Google (2026). Gemini. Retrieved 21 November 2026 from https://gemini.google.com
 - Purpose: explain

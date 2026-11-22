@@ -67,8 +67,8 @@ your choice that reach rules 3 to 6. Do it by hand BEFORE you run your code, the
 | v4 | PTEN | 30 | 79 | low | Rule 4 | review | Rule 4: priority gene PTEN with low impact |
 | v5 | TP53 | 30 | 80 | high | Rule 5 | review | Rule 5: non-priority gene TP53 with high impact |
 | v6 | TP53 | 30 | 81 | moderate | Rule 5 | review | Rule 5: non-priority gene TP53 with moderate impact |
-| v7 | BRCA1 | 31 | 86 | moderate | Rule 5 | review | Rule 5: non-priority gene BRCA1 with moderate impact |
-| v8 | KRAS | 20 | 89 | high | Rule 5 | review | Rule 5: non-priority gene KRAS with high impact |
+| v10 | MYC | 24 | 95 | low | Rule 6 | exclude | Rule 6: non-priority gene MYC with low impact |
+| v12 | EGFR | 37 | 86 | moderate | Rule 3 | prioritize | Rule 3: priority gene EGFR with moderate impact |
 
 ## 4. Test plan
 
